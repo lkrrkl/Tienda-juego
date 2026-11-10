@@ -1,0 +1,1580 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Food POS · Costa Rica</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --metal-1: #2a2d33;
+      --metal-2: #1e2126;
+      --metal-3: #4a4d54;
+      --metal-4: #35383f;
+      --metal-5: #5a5e66;
+      --metal-6: #3a3d44;
+      --well: #14161a;
+      --text: #eef0f6;
+      --text-dim: #9aa0a8;
+      --accent: #ff6b35;
+      --accent-2: #ffb347;
+      --green: #00e676;
+      --green-deep: #00874a;
+      --font: 'Inter', system-ui, sans-serif;
+      --mono: 'Orbitron', 'Courier New', monospace;
+      --radius: 14px;
+      --radius-sm: 10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: var(--font);
+      color: var(--text);
+      background-color: #2a2d33;
+      background-image:
+        repeating-linear-gradient(0deg,
+          rgba(255,255,255,0.025) 0px,
+          rgba(255,255,255,0.025) 1px,
+          transparent 1px,
+          transparent 2px),
+        repeating-linear-gradient(90deg,
+          rgba(0,0,0,0.09) 0px,
+          rgba(0,0,0,0.09) 1px,
+          transparent 1px,
+          transparent 3px),
+        linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 35%, rgba(0,0,0,0.12) 65%, transparent 100%),
+        linear-gradient(180deg, #4a4d54, #35383f 50%, #3f4249);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ============ LAYOUT ============ */
+    .app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ============ TOP AREA (header + menú) ============ */
+    .top-area {
+      position: relative;
+      z-index: 200;
+      flex-shrink: 0;
+    }
+
+    /* ============ HEADER ============ */
+    .app-header {
+      display: grid;
+      grid-template-columns: 44px 1fr 44px;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 14px;
+      background-color: #5a5e66;
+      background-image:
+        repeating-linear-gradient(0deg,
+          rgba(255,255,255,0.06) 0px,
+          rgba(255,255,255,0.06) 1px,
+          transparent 1px,
+          transparent 2px),
+        repeating-linear-gradient(90deg,
+          rgba(0,0,0,0.05) 0px,
+          rgba(0,0,0,0.05) 1px,
+          transparent 1px,
+          transparent 3px),
+        linear-gradient(135deg, rgba(255,255,255,0.12), transparent 40%, rgba(0,0,0,0.15) 70%, transparent 100%),
+        linear-gradient(180deg, #6a6e76, #4a4d54 55%, #565a62);
+      border-bottom: 1px solid #1a1c20;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.18);
+    }
+
+    /* Botón hamburguesa */
+    .menu-toggle {
+      justify-self: start;
+      width: 40px;
+      height: 40px;
+      border-radius: 9px;
+      border: 1px solid #1a1c20;
+      background: rgba(0,0,0,0.22);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -1px 0 rgba(0,0,0,0.3);
+      transition: background 0.2s, transform 0.1s;
+    }
+    .menu-toggle:hover { background: rgba(0,0,0,0.34); }
+    .menu-toggle:active { transform: scale(0.94); }
+    .menu-toggle span {
+      display: block;
+      width: 18px;
+      height: 2px;
+      border-radius: 2px;
+      background: #dfe3ea;
+      transform-origin: center;
+      transition: transform 0.28s cubic-bezier(0.4,0,0.2,1), opacity 0.2s, background 0.2s;
+    }
+    body.menu-open .menu-toggle span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+    body.menu-open .menu-toggle span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+    body.menu-open .menu-toggle span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+    body.menu-open .menu-toggle span { background: var(--accent-2); }
+
+    .store-name {
+      justify-self: center;
+      max-width: 100%;
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      font-size: 1.3rem;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      color: #f4f6fa;
+      cursor: pointer;
+      user-select: none;
+      padding: 6px 14px;
+      border-radius: 10px;
+      transition: background 0.2s, transform 0.1s;
+      text-shadow: 0 1px 0 rgba(0,0,0,0.35), 0 0 18px rgba(255,179,71,0.15);
+      border: 1px solid transparent;
+      overflow: hidden;
+    }
+    .store-name:hover {
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.08);
+    }
+    .store-name:active {
+      transform: scale(0.98);
+      background: rgba(255,255,255,0.1);
+    }
+    .logo-mark {
+      font-size: 1.35rem;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+      flex-shrink: 0;
+    }
+    .store-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .header-spacer { width: 40px; }
+
+    /* ============ MENÚ DESPLEGABLE DE CATEGORÍAS ============ */
+    .cat-menu {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      z-index: 150;
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      pointer-events: none;
+      transition: max-height 0.36s cubic-bezier(0.4,0,0.2,1), opacity 0.24s ease;
+      background-color: #3a3d44;
+      background-image:
+        repeating-linear-gradient(0deg,
+          rgba(255,255,255,0.045) 0px,
+          rgba(255,255,255,0.045) 1px,
+          transparent 1px,
+          transparent 2px),
+        repeating-linear-gradient(90deg,
+          rgba(0,0,0,0.07) 0px,
+          rgba(0,0,0,0.07) 1px,
+          transparent 1px,
+          transparent 3px),
+        linear-gradient(135deg, rgba(255,255,255,0.1), transparent 45%, rgba(0,0,0,0.16) 75%, transparent 100%),
+        linear-gradient(180deg, #4a4d54, #2c2f36 60%, #363940);
+      border-bottom: 2px solid #0a0b0e;
+      border-bottom-left-radius: 16px;
+      border-bottom-right-radius: 16px;
+    }
+    .cat-menu.open {
+      max-height: 75vh;
+      opacity: 1;
+      pointer-events: auto;
+      box-shadow: 0 18px 44px rgba(0,0,0,0.75), inset 0 -1px 0 rgba(255,255,255,0.05);
+      overflow-y: auto;
+    }
+
+    .cat-menu-inner {
+      padding: 12px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      gap: 8px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .cat-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid #1a1c20;
+      cursor: pointer;
+      font-family: var(--font);
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text);
+      text-align: left;
+      background-color: #5a5e66;
+      background-image:
+        repeating-linear-gradient(0deg,
+          rgba(255,255,255,0.06) 0px,
+          rgba(255,255,255,0.06) 1px,
+          transparent 1px,
+          transparent 2px),
+        repeating-linear-gradient(90deg,
+          rgba(0,0,0,0.05) 0px,
+          rgba(0,0,0,0.05) 1px,
+          transparent 1px,
+          transparent 3px),
+        linear-gradient(135deg, rgba(255,255,255,0.13), transparent 45%, rgba(0,0,0,0.13) 75%, transparent 100%),
+        linear-gradient(180deg, #6a6e76, #4a4d54 60%, #565a62);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), inset 0 -1px 0 rgba(0,0,0,0.28), 0 2px 5px rgba(0,0,0,0.35);
+      transition: filter 0.18s, transform 0.1s, border-color 0.18s;
+    }
+    .cat-item:hover { filter: brightness(1.1); }
+    .cat-item:active { transform: scale(0.97); }
+
+    .cat-item.active {
+      background-image:
+        repeating-linear-gradient(0deg,
+          rgba(255,255,255,0.07) 0px,
+          rgba(255,255,255,0.07) 1px,
+          transparent 1px,
+          transparent 2px),
+        repeating-linear-gradient(90deg,
+          rgba(0,0,0,0.05) 0px,
+          rgba(0,0,0,0.05) 1px,
+          transparent 1px,
+          transparent 3px),
+        linear-gradient(135deg, rgba(255,179,71,0.3), transparent 50%, rgba(0,0,0,0.12) 75%, transparent 100%),
+        linear-gradient(180deg, #7a6a52, #5a4a38 60%, #6a5a44);
+      border-color: rgba(255,107,53,0.5);
+      color: #fff5e8;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 0 18px rgba(255,107,53,0.2);
+    }
+
+    .cat-item-emoji { font-size: 1.25rem; line-height: 1; flex-shrink: 0; }
+    .cat-item-name { flex: 1; }
+    .cat-item-count {
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: var(--text-dim);
+      background: rgba(0,0,0,0.3);
+      padding: 2px 8px;
+      border-radius: 999px;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.35);
+    }
+    .cat-item.active .cat-item-count { color: var(--accent-2); }
+
+    /* Capa para cerrar el menú al tocar fuera */
+    .menu-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 140;
+      display: none;
+      background: rgba(6, 8, 11, 0.35);
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+    }
+    .menu-backdrop.show { display: block; animation: backdropIn 0.25s ease; }
+    @keyframes backdropIn { from { opacity: 0; } to { opacity: 1; } }
+
+    /* ============ MAIN ============ */
+    .app-main {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 14px 16px 170px;
+      scroll-behavior: smooth;
+    }
+
+    .cat-title {
+      max-width: 1200px;
+      margin: 0 auto 12px;
+      padding-left: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1rem;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      color: #dfe3ea;
+      text-shadow: 0 1px 0 rgba(0,0,0,0.4);
+    }
+    .cat-title .ct-emoji { font-size: 1.15rem; }
+
+    /* ============ PRODUCT GRID ============ */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(122px, 1fr));
+      gap: 10px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .product-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 7px;
+      padding: 10px 8px 11px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s, filter 0.18s;
+      border: 1px solid #1a1c20;
+      background-color: #4a4d54;
+      background-image:
+        repeating-linear-gradient(0deg,
+          rgba(255,255,255,0.055) 0px,
+          rgba(255,255,255,0.055) 1px,
+          transparent 1px,
+          transparent 2px),
+        repeating-linear-gradient(90deg,
+          rgba(0,0,0,0.06) 0px,
+          rgba(0,0,0,0.06) 1px,
+          transparent 1px,
+          transparent 3px),
+        linear-gradient(135deg, rgba(255,255,255,0.12), transparent 40%, rgba(0,0,0,0.14) 70%, transparent 100%),
+        linear-gradient(180deg, #565a62, #3d4048 60%, #464a52);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.14),
+        inset 0 -1px 0 rgba(0,0,0,0.28),
+        0 2px 5px rgba(0,0,0,0.35);
+      position: relative;
+      overflow: hidden;
+      animation: cardIn 0.32s cubic-bezier(0.34, 1.3, 0.64, 1) both;
+    }
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(8px) scale(0.97); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .product-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 0%, rgba(255,179,71,0.15), transparent 65%);
+      opacity: 0;
+      transition: opacity 0.25s;
+      pointer-events: none;
+    }
+    .product-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(255,107,53,0.5);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.18),
+        inset 0 -1px 0 rgba(0,0,0,0.3),
+        0 8px 22px rgba(0,0,0,0.5),
+        0 0 0 1px rgba(255,107,53,0.15);
+    }
+    .product-card:hover::before { opacity: 1; }
+    .product-card:active { transform: scale(0.96); }
+
+    .svg-well {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 6px;
+      border-radius: 8px;
+      background: var(--well);
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.7), inset 0 -1px 0 rgba(255,255,255,0.04);
+    }
+    .svg-well svg { width: 64px; height: 64px; display: block; }
+
+    .p-name {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-align: center;
+      line-height: 1.2;
+      color: #eef0f6;
+      min-height: 2.4em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .p-price {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: var(--accent-2);
+      font-variant-numeric: tabular-nums;
+      text-shadow: 0 0 12px rgba(255,179,71,0.25);
+    }
+
+    /* ============ REGISTER (CAJA) ============ */
+    .register {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 12px 18px 14px;
+      border-top: 2px solid #0a0b0e;
+      background-color: #1a1c20;
+      background-image:
+        repeating-linear-gradient(0deg,
+          rgba(255,255,255,0.03) 0px,
+          rgba(255,255,255,0.03) 1px,
+          transparent 1px,
+          transparent 2px),
+        repeating-linear-gradient(90deg,
+          rgba(0,0,0,0.1) 0px,
+          rgba(0,0,0,0.1) 1px,
+          transparent 1px,
+          transparent 3px),
+        linear-gradient(180deg, #2a2d33, #17191d 60%, #1e2126);
+      box-shadow: 0 -12px 40px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.06);
+      display: flex;
+      justify-content: center;
+    }
+
+    .register-inner {
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .register-total-block { display: flex; flex-direction: column; gap: 2px; }
+
+    .register-label {
+      font-size: 0.62rem;
+      font-weight: 800;
+      letter-spacing: 2.5px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+    }
+
+    .seven-seg {
+      font-family: var(--mono);
+      font-size: clamp(1.8rem, 5vw, 2.7rem);
+      font-weight: 900;
+      color: var(--green);
+      text-shadow:
+        0 0 6px rgba(0,230,118,0.45),
+        0 0 20px rgba(0,230,118,0.18),
+        0 0 42px rgba(0,230,118,0.06);
+      letter-spacing: 2px;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      transition: transform 0.15s;
+    }
+    .seven-seg.bump { transform: scale(1.07); }
+
+    .register-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .register-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 3px;
+      font-size: 0.68rem;
+      color: var(--text-dim);
+      font-weight: 600;
+    }
+    #itemCount { white-space: nowrap; }
+    #clockDisplay {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--accent-2);
+      letter-spacing: 1.5px;
+      opacity: 0.85;
+    }
+
+    .register-buttons { display: flex; gap: 10px; align-items: center; }
+
+    .clear-btn {
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid #1a1c20;
+      cursor: pointer;
+      font-family: var(--font);
+      font-size: 0.95rem;
+      transition: filter 0.2s, transform 0.1s;
+      color: #ffb3a8;
+      background-color: #4a4d54;
+      background-image:
+        repeating-linear-gradient(0deg,
+          rgba(255,255,255,0.06) 0px,
+          rgba(255,255,255,0.06) 1px,
+          transparent 1px,
+          transparent 2px),
+        linear-gradient(180deg, #565a62, #3d4048 60%, #464a52);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), inset 0 -1px 0 rgba(0,0,0,0.28), 0 2px 5px rgba(0,0,0,0.35);
+    }
+    .clear-btn:hover { filter: brightness(1.1); }
+    .clear-btn:active { transform: scale(0.96); filter: brightness(0.95); }
+
+    .pay-btn {
+      padding: 13px 26px;
+      border-radius: 10px;
+      border: 1px solid #0a4a2a;
+      cursor: pointer;
+      font-family: var(--font);
+      font-weight: 900;
+      font-size: 0.95rem;
+      letter-spacing: 1.5px;
+      color: #fff;
+      transition: filter 0.2s, transform 0.1s;
+      background-color: #1e8449;
+      background-image:
+        repeating-linear-gradient(0deg,
+          rgba(255,255,255,0.09) 0px,
+          rgba(255,255,255,0.09) 1px,
+          transparent 1px,
+          transparent 2px),
+        repeating-linear-gradient(90deg,
+          rgba(0,0,0,0.06) 0px,
+          rgba(0,0,0,0.06) 1px,
+          transparent 1px,
+          transparent 3px),
+        linear-gradient(135deg, rgba(255,255,255,0.2), transparent 45%, rgba(0,0,0,0.15) 75%, transparent 100%),
+        linear-gradient(180deg, #2ecc71, #1e8449 55%, #239b56);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.35),
+        inset 0 -1px 0 rgba(0,0,0,0.3),
+        0 2px 8px rgba(0,0,0,0.35),
+        0 0 22px rgba(0,230,118,0.18);
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+    .pay-btn:hover { filter: brightness(1.1); }
+    .pay-btn:active { transform: scale(0.96); filter: brightness(0.94); }
+
+    /* ============ MODAL NOMBRE TIENDA ============ */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 300;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(10, 12, 16, 0.72);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+    .modal-overlay.show { display: flex; }
+
+    .modal {
+      width: 100%;
+      max-width: 380px;
+      border-radius: 18px;
+      padding: 24px;
+      border: 1px solid #1a1c20;
+      background-color: #3a3d44;
+      background-image:
+        repeating-linear-gradient(0deg,
+          rgba(255,255,255,0.04) 0px,
+          rgba(255,255,255,0.04) 1px,
+          transparent 1px,
+          transparent 2px),
+        repeating-linear-gradient(90deg,
+          rgba(0,0,0,0.06) 0px,
+          rgba(0,0,0,0.06) 1px,
+          transparent 1px,
+          transparent 3px),
+        linear-gradient(135deg, rgba(255,255,255,0.1), transparent 45%, rgba(0,0,0,0.15) 75%, transparent 100%),
+        linear-gradient(180deg, #4a4d54, #2e3138 60%, #3a3d44);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.15),
+        0 24px 60px rgba(0,0,0,0.65);
+      animation: modalIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.92) translateY(10px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .modal h3 {
+      font-size: 0.72rem;
+      letter-spacing: 2.5px;
+      font-weight: 800;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    .modal input {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 10px;
+      border: 1px solid #1a1c20;
+      background: #1a1c20;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 1rem;
+      font-weight: 600;
+      outline: none;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.6);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .modal input:focus {
+      border-color: rgba(255,107,53,0.55);
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.6), 0 0 0 3px rgba(255,107,53,0.15);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      justify-content: flex-end;
+    }
+
+    .btn-secondary, .btn-primary {
+      padding: 11px 20px;
+      border-radius: 9px;
+      border: 1px solid #1a1c20;
+      font-family: var(--font);
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: filter 0.2s, transform 0.1s;
+    }
+    .btn-secondary {
+      color: var(--text-dim);
+      background-color: #3a3d44;
+      background-image:
+        repeating-linear-gradient(0deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 1px, transparent 1px, transparent 2px),
+        linear-gradient(180deg, #4a4d54, #2e3138);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+    }
+    .btn-secondary:hover { filter: brightness(1.1); }
+    .btn-primary {
+      color: #fff;
+      background-color: #1e8449;
+      background-image:
+        repeating-linear-gradient(0deg, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 1px, transparent 1px, transparent 2px),
+        linear-gradient(180deg, #2ecc71, #1e8449 60%, #239b56);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.28), 0 0 18px rgba(0,230,118,0.18);
+    }
+    .btn-primary:hover { filter: brightness(1.1); }
+    .btn-secondary:active, .btn-primary:active { transform: scale(0.97); }
+
+    /* ============ OVERLAY DE PAGO ============ */
+    .payment-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      display: none;
+      align-items: flex-start;
+      justify-content: center;
+      overflow-y: auto;
+      padding: 30px 20px;
+      background: rgba(8, 10, 14, 0.9);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    .payment-overlay.show { display: flex; }
+
+    .payment-stage {
+      margin: auto;
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .stage-success {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 22px;
+      opacity: 0;
+      transform: scale(0.85);
+      transition: opacity 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .stage-success.active { opacity: 1; transform: scale(1); }
+
+    .success-circle {
+      width: 130px;
+      height: 130px;
+      filter: drop-shadow(0 0 30px rgba(0,230,118,0.4));
+    }
+    .success-circle svg { width: 100%; height: 100%; display: block; }
+    .success-circle circle {
+      stroke: var(--green);
+      stroke-width: 3.5;
+      fill: rgba(0, 230, 118, 0.08);
+      stroke-dasharray: 285;
+      stroke-dashoffset: 285;
+      transform-origin: 50% 50%;
+    }
+    .success-circle path {
+      stroke: var(--green);
+      stroke-width: 5.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+      stroke-dasharray: 70;
+      stroke-dashoffset: 70;
+    }
+    .stage-success.active .success-circle circle {
+      animation: drawCircle 0.65s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    .stage-success.active .success-circle path {
+      animation: drawCheck 0.4s 0.55s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    @keyframes drawCircle { to { stroke-dashoffset: 0; } }
+    @keyframes drawCheck { to { stroke-dashoffset: 0; } }
+
+    .success-title {
+      font-family: var(--mono);
+      font-size: 1.7rem;
+      font-weight: 900;
+      letter-spacing: 3px;
+      color: var(--green);
+      text-align: center;
+      text-shadow: 0 0 22px rgba(0,230,118,0.55), 0 0 50px rgba(0,230,118,0.25);
+      animation: successPulse 1.6s ease-in-out infinite alternate;
+    }
+    @keyframes successPulse {
+      from { text-shadow: 0 0 22px rgba(0,230,118,0.55), 0 0 50px rgba(0,230,118,0.25); }
+      to { text-shadow: 0 0 32px rgba(0,230,118,0.8), 0 0 70px rgba(0,230,118,0.4); }
+    }
+
+    .success-amount {
+      font-family: var(--mono);
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: #eef0f6;
+      letter-spacing: 1px;
+    }
+    .success-sub {
+      font-size: 0.7rem;
+      letter-spacing: 2px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .stage-receipt {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+
+    .printer-body {
+      width: 300px;
+      max-width: 100%;
+      height: 54px;
+      border-radius: 12px 12px 6px 6px;
+      position: relative;
+      z-index: 2;
+      border: 1px solid #1a1c20;
+      background-color: #4a4d54;
+      background-image:
+        repeating-linear-gradient(0deg,
+          rgba(255,255,255,0.06) 0px,
+          rgba(255,255,255,0.06) 1px,
+          transparent 1px,
+          transparent 2px),
+        repeating-linear-gradient(90deg,
+          rgba(0,0,0,0.06) 0px,
+          rgba(0,0,0,0.06) 1px,
+          transparent 1px,
+          transparent 3px),
+        linear-gradient(135deg, rgba(255,255,255,0.14), transparent 45%, rgba(0,0,0,0.15) 75%, transparent 100%),
+        linear-gradient(180deg, #6a6e76, #3d4048 55%, #565a62);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.22),
+        inset 0 -1px 0 rgba(0,0,0,0.35),
+        0 6px 20px rgba(0,0,0,0.5);
+    }
+    .printer-body::before {
+      content: '';
+      position: absolute;
+      top: 10px;
+      left: 12px;
+      right: 12px;
+      height: 3px;
+      border-radius: 2px;
+      background: rgba(0,0,0,0.3);
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
+    }
+    .printer-led {
+      position: absolute;
+      top: 18px;
+      right: 16px;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 10px var(--green), 0 0 20px rgba(0,230,118,0.5);
+      animation: ledBlink 1s ease-in-out infinite alternate;
+    }
+    @keyframes ledBlink {
+      from { opacity: 0.5; }
+      to { opacity: 1; box-shadow: 0 0 14px var(--green), 0 0 28px rgba(0,230,118,0.7); }
+    }
+
+    .printer-slot {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 250px;
+      max-width: 88%;
+      height: 7px;
+      border-radius: 3px;
+      background: #05060a;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.9), 0 1px 0 rgba(255,255,255,0.1);
+    }
+
+    .receipt-wrap {
+      width: 270px;
+      max-width: 100%;
+      max-height: 0;
+      overflow: hidden;
+      position: relative;
+      margin-top: -3px;
+      transition: max-height 1.25s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 1;
+    }
+
+    .receipt {
+      background: #f8f8f4;
+      color: #1a1c20;
+      padding: 18px 18px 22px;
+      font-family: 'Courier New', 'Courier', monospace;
+      font-size: 0.72rem;
+      line-height: 1.55;
+      position: relative;
+      margin-top: 4px;
+      box-shadow: 0 14px 40px rgba(0,0,0,0.55);
+    }
+    .receipt::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -9px;
+      height: 9px;
+      background: #f8f8f4;
+      clip-path: polygon(
+        0 0, 5% 100%, 10% 0, 15% 100%, 20% 0, 25% 100%, 30% 0, 35% 100%,
+        40% 0, 45% 100%, 50% 0, 55% 100%, 60% 0, 65% 100%, 70% 0, 75% 100%,
+        80% 0, 85% 100%, 90% 0, 95% 100%, 100% 0
+      );
+    }
+
+    .receipt-header { text-align: center; margin-bottom: 6px; }
+    .receipt-store {
+      font-weight: 900;
+      font-size: 0.92rem;
+      letter-spacing: 0.5px;
+      margin-bottom: 3px;
+    }
+    .receipt-divider {
+      color: #888;
+      letter-spacing: 1px;
+      margin: 5px 0;
+      font-size: 0.68rem;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    .receipt-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 0.68rem;
+    }
+    .receipt-line span:first-child {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      padding-right: 6px;
+    }
+    .receipt-line span:last-child { white-space: nowrap; }
+    .receipt-total {
+      font-weight: 900;
+      font-size: 0.82rem;
+      margin: 4px 0;
+    }
+    .receipt-footer {
+      text-align: center;
+      font-size: 0.66rem;
+      margin-top: 4px;
+      line-height: 1.5;
+    }
+    .receipt-stamp {
+      display: inline-block;
+      color: var(--green-deep);
+      border: 2px solid var(--green-deep);
+      padding: 3px 10px;
+      font-weight: 900;
+      font-size: 0.72rem;
+      letter-spacing: 1.5px;
+      margin-top: 12px;
+      border-radius: 4px;
+      transform: rotate(-7deg);
+      animation: stampIn 0.45s 1.15s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+    @keyframes stampIn {
+      0% { opacity: 0; transform: rotate(-7deg) scale(2.2); }
+      100% { opacity: 1; transform: rotate(-7deg) scale(1); }
+    }
+
+    .done-btn {
+      margin-top: 22px;
+      padding: 13px 40px;
+      border-radius: 10px;
+      border: 1px solid #1a1c20;
+      cursor: pointer;
+      font-family: var(--font);
+      font-weight: 800;
+      font-size: 0.9rem;
+      letter-spacing: 1.5px;
+      color: #fff;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.35s, transform 0.35s, filter 0.2s;
+      background-color: #4a4d54;
+      background-image:
+        repeating-linear-gradient(0deg, rgba(255,255,255,0.06) 0px, rgba(255,255,255,0.06) 1px, transparent 1px, transparent 2px),
+        linear-gradient(180deg, #6a6e76, #3d4048 60%, #565a62);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), inset 0 -1px 0 rgba(0,0,0,0.3), 0 4px 14px rgba(0,0,0,0.4);
+      pointer-events: none;
+    }
+    .done-btn.show {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    .done-btn:hover { filter: brightness(1.12); }
+    .done-btn:active { transform: scale(0.97); }
+
+    /* ============ TOAST ============ */
+    .toast {
+      position: fixed;
+      bottom: 130px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #1e2126;
+      color: var(--green);
+      border: 1px solid rgba(0,230,118,0.3);
+      padding: 10px 22px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s ease;
+      z-index: 200;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.5);
+      white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 640px) {
+      .app-header { padding: 10px 12px; }
+      .store-name { font-size: 1.05rem; padding: 5px 10px; gap: 7px; }
+      .logo-mark { font-size: 1.15rem; }
+      .app-main { padding: 12px 10px 190px; }
+      .cat-title { font-size: 0.9rem; margin-bottom: 10px; }
+      .product-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 8px;
+      }
+      .svg-well svg { width: 52px; height: 52px; }
+      .p-name { font-size: 0.66rem; min-height: 2.6em; }
+      .p-price { font-size: 0.76rem; }
+
+      .cat-menu-inner {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 7px;
+        padding: 10px;
+      }
+      .cat-item { padding: 11px 12px; font-size: 0.82rem; }
+
+      .register { padding: 10px 14px 12px; }
+      .register-inner { gap: 10px; }
+      .seven-seg { font-size: clamp(1.5rem, 6vw, 2.1rem); }
+      .register-meta { font-size: 0.62rem; }
+      .pay-btn { padding: 12px 20px; font-size: 0.85rem; letter-spacing: 1px; }
+      .clear-btn { padding: 11px 13px; }
+
+      .success-circle { width: 110px; height: 110px; }
+      .success-title { font-size: 1.35rem; letter-spacing: 2px; }
+      .success-amount { font-size: 1.15rem; }
+    }
+
+    @media (max-width: 380px) {
+      .product-grid { grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 7px; }
+      .svg-well svg { width: 46px; height: 46px; }
+      .p-name { font-size: 0.62rem; }
+      .cat-menu-inner { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app">
+    <!-- ===== TOP AREA: header + menú desplegable ===== -->
+    <div class="top-area">
+      <header class="app-header">
+        <button class="menu-toggle" id="menuToggle" aria-label="Categorías">
+          <span></span><span></span><span></span>
+        </button>
+        <h1 class="store-name" id="storeName">
+          <span class="logo-mark">🍽️</span>
+          <span class="store-text" id="storeText">Food POS</span>
+        </h1>
+        <div class="header-spacer"></div>
+      </header>
+
+      <!-- Menú de categorías -->
+      <nav class="cat-menu" id="catMenu" aria-label="Categorías">
+        <div class="cat-menu-inner" id="catMenuInner"></div>
+      </nav>
+    </div>
+
+    <!-- ===== MAIN ===== -->
+    <main class="app-main" id="appMain">
+      <div class="cat-title" id="catTitle"></div>
+      <div class="product-grid" id="grid"></div>
+    </main>
+  </div>
+
+  <!-- Capa para cerrar el menú -->
+  <div class="menu-backdrop" id="menuBackdrop"></div>
+
+  <!-- CAJA REGISTRADORA INFERIOR -->
+  <footer class="register">
+    <div class="register-inner">
+      <div class="register-total-block">
+        <div class="register-label">TOTAL A PAGAR</div>
+        <div class="seven-seg" id="totalDisplay">₡0</div>
+      </div>
+      <div class="register-actions">
+        <div class="register-meta">
+          <span id="clockDisplay">--:--:--</span>
+          <span id="itemCount">0 artículos</span>
+        </div>
+        <div class="register-buttons">
+          <button class="clear-btn" id="clearBtn" aria-label="Limpiar carrito">🗑️</button>
+          <button class="pay-btn" id="payBtn">PAGAR</button>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- MODAL: cambiar nombre de tienda -->
+  <div class="modal-overlay" id="nameModal">
+    <div class="modal">
+      <h3>Nombre de la tienda</h3>
+      <input type="text" id="nameInput" maxlength="30" placeholder="Escriba el nombre...">
+      <div class="modal-actions">
+        <button class="btn-secondary" id="cancelName">Cancelar</button>
+        <button class="btn-primary" id="saveName">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- OVERLAY DE PAGO -->
+  <div class="payment-overlay" id="paymentOverlay">
+    <div class="payment-stage">
+      <div class="stage-success" id="stageSuccess">
+        <div class="success-circle">
+          <svg viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="45"/>
+            <path d="M31 51 L45 65 L70 37"/>
+          </svg>
+        </div>
+        <div>
+          <div class="success-title">PAGO EFECTUADO</div>
+        </div>
+        <div class="success-amount" id="successAmount">₡0</div>
+        <div class="success-sub">Transacción exitosa</div>
+      </div>
+
+      <div class="stage-receipt" id="stageReceipt">
+        <div class="printer-body">
+          <div class="printer-led"></div>
+          <div class="printer-slot"></div>
+        </div>
+        <div class="receipt-wrap" id="receiptWrap">
+          <div class="receipt" id="receiptContent"></div>
+        </div>
+        <button class="done-btn" id="doneBtn">LISTO</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    /* ============================================================
+       DATOS: 6 CATEGORÍAS × 10 PRODUCTOS (precios en colones)
+       ============================================================ */
+    const CATEGORIES = [
+      { id: 'fast',    name: 'Comidas Rápidas', emoji: '🍔' },
+      { id: 'pastry',  name: 'Pastelería',      emoji: '🧁' },
+      { id: 'ice',     name: 'Heladería',       emoji: '🍦' },
+      { id: 'coffee',  name: 'Cafetería',       emoji: '☕' },
+      { id: 'market',  name: 'Supermercado',    emoji: '🛒' },
+      { id: 'pharma',  name: 'Farmacia',        emoji: '💊' }
+    ];
+
+    const PRODUCTS = {
+      fast: [
+        { name: 'Hamburguesa Sencilla', price: 3000, svg: svgBurger },
+        { name: 'Hamburguesa Doble',    price: 3800, svg: svgBurgerDouble },
+        { name: 'Pizza Pepperoni',      price: 4500, svg: svgPizza },
+        { name: 'Hot Dog',              price: 2200, svg: svgHotdog },
+        { name: 'Papas Fritas',         price: 1800, svg: svgFries },
+        { name: 'Alitas BBQ (6 uds)',   price: 3500, svg: svgWings },
+        { name: 'Nachos con Queso',     price: 3400, svg: svgNachos },
+        { name: 'Burrito de Pollo',     price: 3400, svg: svgBurrito },
+        { name: 'Tacos (3 uds)',        price: 3200, svg: svgTacos },
+        { name: 'Sándwich Club',        price: 3800, svg: svgSandwich }
+      ],
+      pastry: [
+        { name: 'Cupcake',              price: 1450, svg: svgCupcake },
+        { name: 'Cake Pop',             price: 1100, svg: svgCakePop },
+        { name: 'Queque Marmoleado',    price: 1800, svg: svgCakeSlice },
+        { name: 'Galleta con Chispas',  price: 900,  svg: svgCookie },
+        { name: 'Donut Glaseado',       price: 1200, svg: svgDonut },
+        { name: 'Brownie',              price: 1500, svg: svgBrownie },
+        { name: 'Cheesecake',           price: 2200, svg: svgCheesecake },
+        { name: 'Macaron',              price: 1000, svg: svgMacaron },
+        { name: 'Croissant',            price: 1300, svg: svgCroissant },
+        { name: 'Tarta de Frutas',      price: 2500, svg: svgTart }
+      ],
+      ice: [
+        { name: 'Cono Sencillo',        price: 1200, svg: svgCone },
+        { name: 'Cono Doble',           price: 1800, svg: svgConeDouble },
+        { name: 'Banana Split',         price: 3600, svg: svgBananaSplit },
+        { name: 'Milkshake',            price: 3000, svg: svgMilkshake },
+        { name: 'Sundae',               price: 2800, svg: svgSundae },
+        { name: 'Paleta de Helado',     price: 1000, svg: svgPopsicle },
+        { name: 'Copa de Helado',       price: 3200, svg: svgCupIceCream },
+        { name: 'Sándwich de Helado',   price: 1500, svg: svgIceSandwich },
+        { name: 'Helado en Vaso',       price: 2000, svg: svgIceCup },
+        { name: 'Granizado',            price: 1800, svg: svgSlush }
+      ],
+      coffee: [
+        { name: 'Espresso',             price: 1500, svg: svgEspresso },
+        { name: 'Capuchino',            price: 2200, svg: svgCappuccino },
+        { name: 'Latte',                price: 2400, svg: svgLatte },
+        { name: 'Americano',            price: 1600, svg: svgAmericano },
+        { name: 'Mocha',                price: 2600, svg: svgMocha },
+        { name: 'Frappuccino',          price: 2800, svg: svgFrappuccino },
+        { name: 'Té Caliente',          price: 1400, svg: svgTea },
+        { name: 'Chocolate Caliente',   price: 2000, svg: svgHotChocolate },
+        { name: 'Croissant Mantequilla',price: 1500, svg: svgCroissant },
+        { name: 'Muffin de Arándanos',  price: 1700, svg: svgMuffin }
+      ],
+      market: [
+        { name: 'Leche Entera 1L',      price: 1100, svg: svgMilk },
+        { name: 'Pan Blanco',           price: 1600, svg: svgBread },
+        { name: 'Huevos (docena)',      price: 2000, svg: svgEggs },
+        { name: 'Arroz 1kg',            price: 1100, svg: svgRice },
+        { name: 'Frijoles Negros 1kg',  price: 1600, svg: svgBeans },
+        { name: 'Aceite Vegetal 1L',    price: 1800, svg: svgOil },
+        { name: 'Azúcar 1kg',           price: 1100, svg: svgSugar },
+        { name: 'Sal 500g',             price: 300,  svg: svgSalt },
+        { name: 'Café Molido 500g',     price: 2800, svg: svgCoffeeBag },
+        { name: 'Pasta Espagueti 500g', price: 1000, svg: svgPasta }
+      ],
+      pharma: [
+        { name: 'Acetaminofén 500mg (10)', price: 1200, svg: svgPillBottle },
+        { name: 'Ibuprofeno 400mg (10)',   price: 1500, svg: svgCapsule },
+        { name: 'Alcohol en Gel 250ml',    price: 2200, svg: svgSanitizer },
+        { name: 'Mascarillas (10 uds)',    price: 1800, svg: svgMask },
+        { name: 'Curitas (20 uds)',        price: 900,  svg: svgBandAid },
+        { name: 'Venda Elástica',          price: 1300, svg: svgBandageRoll },
+        { name: 'Suero Oral',              price: 1100, svg: svgOralSerum },
+        { name: 'Jabón Antibacterial',     price: 1600, svg: svgSoap },
+        { name: 'Termómetro Digital',      price: 6500, svg: svgThermometer },
+        { name: 'Vitamina C 500mg',        price: 3500, svg: svgVitaminC }
+      ]
+    };
+
+    /* ============================================================
+       GENERADORES SVG (100×100)
+       ============================================================ */
+    function svgBurger(){return `<svg viewBox="0 0 100 100" fill="none"><rect x="18" y="28" width="64" height="10" rx="5" fill="#F4A261"/><rect x="14" y="36" width="72" height="8" rx="4" fill="#E76F51"/><rect x="18" y="42" width="64" height="6" rx="3" fill="#2A9D8F"/><rect x="16" y="46" width="68" height="8" rx="4" fill="#8B4513"/><rect x="18" y="52" width="64" height="6" rx="3" fill="#E9C46A"/><rect x="20" y="56" width="60" height="12" rx="6" fill="#F4A261"/><circle cx="50" cy="26" r="2" fill="#FFF3E0"/><circle cx="36" cy="24" r="1.5" fill="#FFF3E0"/><circle cx="62" cy="24" r="1.5" fill="#FFF3E0"/></svg>`}
+    function svgBurgerDouble(){return `<svg viewBox="0 0 100 100" fill="none"><rect x="18" y="20" width="64" height="9" rx="4" fill="#F4A261"/><rect x="16" y="27" width="68" height="7" rx="3" fill="#E76F51"/><rect x="18" y="32" width="64" height="5" rx="2" fill="#2A9D8F"/><rect x="16" y="35" width="68" height="7" rx="3" fill="#8B4513"/><rect x="18" y="40" width="64" height="5" rx="2" fill="#E9C46A"/><rect x="16" y="43" width="68" height="7" rx="3" fill="#8B4513"/><rect x="18" y="48" width="64" height="5" rx="2" fill="#2A9D8F"/><rect x="20" y="52" width="60" height="11" rx="5" fill="#F4A261"/></svg>`}
+    function svgPizza(){return `<svg viewBox="0 0 100 100" fill="none"><circle cx="50" cy="52" r="34" fill="#F4A261"/><circle cx="50" cy="52" r="28" fill="#E76F51"/><circle cx="50" cy="52" r="27" fill="#E9C46A"/><circle cx="38" cy="42" r="5" fill="#C0392B"/><circle cx="62" cy="44" r="5" fill="#C0392B"/><circle cx="48" cy="64" r="5" fill="#C0392B"/><circle cx="30" cy="58" r="4" fill="#C0392B"/><circle cx="68" cy="62" r="4" fill="#C0392B"/><path d="M28 50 Q34 48 36 54" stroke="#2A9D8F" stroke-width="2.5" fill="none"/><path d="M58 34 Q62 38 58 42" stroke="#2A9D8F" stroke-width="2.5" fill="none"/><path d="M44 74 Q48 70 52 74" stroke="#2A9D8F" stroke-width="2.5" fill="none"/></svg>`}
+    function svgHotdog(){return `<svg viewBox="0 0 100 100" fill="none"><rect x="14" y="42" width="72" height="18" rx="9" fill="#F4A261"/><rect x="20" y="46" width="60" height="10" rx="5" fill="#C0392B"/><path d="M22 44 Q30 36 40 44 Q50 36 60 44 Q70 36 78 44" stroke="#E9C46A" stroke-width="4" fill="none" stroke-linecap="round"/><circle cx="34" cy="56" r="2" fill="#FFF3E0"/><circle cx="50" cy="56" r="2" fill="#FFF3E0"/><circle cx="66" cy="56" r="2" fill="#FFF3E0"/></svg>`}
+    function svgFries(){return `<svg viewBox="0 0 100 100" fill="none"><path d="M30 46 L34 84 Q35 88 40 88 L60 88 Q65 88 66 84 L70 46 Z" fill="#E76F51"/><rect x="34" y="42" width="32" height="8" rx="2" fill="#C0392B"/><rect x="36" y="20" width="5" height="24" rx="2" fill="#F4D03F" transform="rotate(-8 38 32)"/><rect x="45" y="16" width="5" height="28" rx="2" fill="#F4D03F"/><rect x="54" y="20" width="5" height="24" rx="2" fill="#F4D03F" transform="rotate(8 56 32)"/><rect x="62" y="24" width="5" height="20" rx="2" fill="#F4D03F" transform="rotate(14 64 34)"/><rect x="28" y="24" width="5" height="20" rx="2" fill="#F4D03F" transform="rotate(-14 30 34)"/><circle cx="50" cy="66" r="2" fill="#FFF3E0"/><circle cx="42" cy="72" r="1.5" fill="#FFF3E0"/><circle cx="58" cy="70" r="1.5" fill="#FFF3E0"/></svg>`}
+    function svgWings(){return `<svg viewBox="0 0 100 100" fill="none"><path d="M30 40 Q20 30 28 22 Q38 16 44 28 Q50 40 42 48 Q34 52 30 40Z" fill="#C0392B"/><path d="M60 38 Q70 26 78 34 Q84 44 74 50 Q64 54 60 44Z" fill="#C0392B"/><path d="M48 62 Q40 54 46 48 Q54 44 58 52 Q62 60 54 64Z" fill="#A93226"/><circle cx="32" cy="34" r="1.5" fill="#FFF3E0"/><circle cx="72" cy="38" r="1.5" fill="#FFF3E0"/><circle cx="50" cy="54" r="1.5" fill="#FFF3E0"/><path d="M22 66 Q30 60 38 66" stroke="#E9C46A" stroke-width="2" fill="none"/></svg>`}
+    function svgNachos(){return `<svg viewBox="0 0 100 100" fill="none"><path d="M20 70 L50 30 L58 70 Z" fill="#F4D03F"/><path d="M40 74 L70 28 L78 74 Z" fill="#E9C46A"/><path d="M28 76 L58 26 L66 76 Z" fill="#F4D03F"/><path d="M32 62 Q42 56 52 62 Q62 68 72 62" stroke="#F39C12" stroke-width="4" fill="none" stroke-linecap="round"/><circle cx="48" cy="52" r="3" fill="#C0392B"/><circle cx="60" cy="48" r="2.5" fill="#C0392B"/></svg>`}
+    function svgBurrito(){return `<svg viewBox="0 0 100 100" fill="none"><rect x="22" y="38" width="56" height="26" rx="13" fill="#F4A261"/><rect x="26" y="42" width="48" height="18" rx="9" fill="#E9C46A"/><path d="M30 42 Q38 38 46 42 Q54 46 62 42 Q70 38 74 42" stroke="#C0392B" stroke-width="3" fill="none"/><path d="M32 58 Q40 62 48 58 Q56 54 64 58 Q72 62 74 58" stroke="#2A9D8F" stroke-width="2.5" fill="none"/><ellipse cx="50" cy="38" rx="14" ry="4" fill="#E76F51"/></svg>`}
+    function svgTacos(){return `<svg viewBox="0 0 100 100" fill="none"><path d="M20 66 Q50 16 80 66 Z" fill="#F4D03F"/><path d="M26 64 Q50 30 74 64" fill="#E9C46A"/><path d="M30 62 Q50 38 70 62" fill="#C0392B"/><path d="M34 60 Q50 44 66 60" fill="#2A9D8F"/><circle cx="40" cy="58" r="2" fill="#FFF3E0"/><circle cx="56" cy="56" r="2" fill="#FFF3E0"/><circle cx="48" cy="62" r="1.5" fill="#FFF3E0"/></svg>`}
+    function svgSandwich(){return `<svg viewBox="0 0 100 100" fill="none"><path d="M20 50 L50 18 L80 50 Z" fill="#F4A261"/><path d="M24 50 L50 24 L76 50 Z" fill="#E9C46A"/><rect x="24" y="50" width="52" height="6" fill="#2A9D8F"/><rect x="26" y="56" width="48" height="5" fill="#E76F51"/><rect x="24" y="61" width="52" height="5" fill="#F4A261"/><path d="M22 66 L50 82 L78 66 Z" fill="#F4A261"/></svg>`}
+    function svgCupcake(){return `<svg viewBox="0 0 100 100" fill="none"><path d="M30 54 L36 86 Q37 90 42 90 L58 90 Q63 90 64 86 L70 54 Z" fill="#E76F51"/><path d="M30 54 Q30 34 50 34 Q70 34 70 54 Z" fill="#F4A261"/><path d="M34 50 Q36 30 50 32 Q64 30 66 50" fill="#FFB6C1"/><circle cx="50" cy="28" r="5" fill="#C0392B"/><circle cx="38" cy="40" r="2" fill="#FFF"/><circle cx="58" cy="38" r="2" fill="#FFF"/><circle cx="48" cy="44" r="1.5" fill="#FFF"/></svg>`}
+    function svgCakePop(){return `<svg viewBox="0 0 100 100" fill="none"><rect x="48" y="50" width="4" height="40" rx="2" fill="#D4A373"/><circle cx="50" cy="38" r="18" fill="#8B4513"/><path d="M40 30 Q46 24 52 30" stroke="#FFF" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="58" cy="34" r="2" fill="#FFB6C1"/><circle cx="42" cy="42" r="2" fill="#FFB6C1"/></svg>`}
+    function svgCakeSlice(){return `<svg viewBox="0 0 100 100" fill="none"><rect x="24" y="38" width="52" height="34" rx="4" fill="#F4A261"/><rect x="24" y="38" width="52" height="10" rx="4" fill="#FFB6C1"/><rect x="24" y="54" width="52" height="4" fill="#8B4513"/><circle cx="50" cy="32" r="4" fill="#C0392B"/><path d="M30 66 L38 66" stroke="#E76F51" stroke-width="2"/><path d="M46 66 L54 66" stroke="#E76F51" stroke-width="2"/><path d="M62 66 L70 66" stroke="#E76F51" stroke-width="2"/></svg>`}
+    function svgCookie(){return `<svg viewBox="0 0 100 100" fill="none"><circle cx="50" cy="52" r="30" fill="#D4A373"/><circle cx="50" cy="52" r="28" fill="#E9C46A"/><circle cx="38" cy="44" r="4" fill="#5D4037"/><circle cx="60" cy="40" r="3.5" fill="#5D4037"/><circle cx="52" cy="62" r="4" fill="#5D4037"/><circle cx="34" cy="60" r="3" fill="#5D4037"/><circle cx="64" cy="58" r="3" fill="#5D4037"/><circle cx="46" cy="36" r="2" fill="#5D4037"/></svg>`}
+    function svgDonut(){return `<svg viewBox="0 0 100 100" fill="none"><circle cx="50" cy="52" r="30" fill="#F4A261"/><circle cx="50" cy="52" r="13" fill="#14161a"/><path d="M28 42 Q34 28 50 26 Q66 28 72 42" fill="#FFB6C1"/><path d="M28 46 Q34 34 50 32 Q66 34 72 46" fill="#FF69B4"/><circle cx="36" cy="36" r="1.5" fill="#FFF"/><circle cx="58" cy="32" r="1.5" fill="#FFF"/><circle cx="64" cy="44" r="1.5" fill="#FFF"/><circle cx="42" cy="42" r="1.5" fill="#FFF"/></svg>`}
+    function svgBrownie(){return `<svg viewBox="0 0 100 100" fill="none"><rect x="24" y="34" width="52" height="42" rx="3" fill="#5D4037"/><rect x="26" y="36" width="48" height="38" rx="2" fill="#6D4C41"/><path d="M32 48 L44 48" stroke="#3E2723" stroke-width="2"/><path d="M52 48 L68 48" stroke="#3E2723" stroke-width="2"/><path d="M32 58 L44 58" stroke="#3E2723" stroke-width="2"/><path d="M52 58 L68 58" stroke="#3E2723" stroke-width="2"/><rect x="30" y="40" width="6" height="4" rx="1" fill="#8D6E63"/><rect x="62" y="40" width="6" height="4" rx="1" fill="#8D6E63"/></svg>`}
+    function svgCheesecake(){return `<svg viewBox="0 0 100 100" fill="none"><path d="M24 72 L50 30 L76 72 Z" fill="#F5DEB3"/><path d="M28 72 L50 36 L72 72 Z" fill="#FFF8DC"/><rect x="24" y="72" width="52" height="8" fill="#D4A373"/><path d="M50 34 Q56 30 62 34" stroke="#C0392B" stroke-width="2.5" fill="none"/><circle cx="50" cy="44" r="2.5" fill="#C0392B"/></svg>`}
+    function svgMacaron(){return `<svg viewBox="0 0 100 100" fill="none"><ellipse cx="50" cy="38" rx="26" ry="12" fill="#FFB6C1"/><ellipse cx="50" cy="48" rx="26" ry="12" fill="#FF69B4"/><ellipse cx="50" cy="58" rx="26" ry="12" fill="#FFB6C1"/><rect x="24" y="46" width="52" height="6" rx="3" fill="#FFF"/><circle cx="38" cy="34" r="1.5" fill="#FFF"/><circle cx="60" cy="34" r="1.5" fill="#FFF"/></svg>`}
+    function svgCroissant(){return `<svg viewBox="0 0 100 100" fill="none"><path d="M18 58 Q24 24 50 22 Q76 24 82 58 Q76 52 68 54 Q60 56 50 52 Q40 56 32 54 Q24 52 18 58Z" fill="#E9C46A"/><path d="M22 56 Q28 30 50 28 Q72 30 78 56" stroke="#F4A261" stroke-width="3" fill="none"/><path d="M30 50 Q34 36 46 34" stroke="#D4A373" stroke-width="2" fill="none"/><path d="M70 50 Q66 36 54 34" stroke="#D4A373" stroke-width="2" fill="none"/></svg>`}
+    function svgTart(){return `<svg viewBox="0 0 100 100" fill="none"><path d="M22 72 L50 26 L78 72 Z" fill="#F4A261"/><path d="M26 72 L50 32 L74 72 Z" fill="#FFE0B2"/><circle cx="40" cy="56" r="4" fill="#C0392B"/><circle cx="58" cy="52" r="3.5" fill="#2A9D8F"/><circle cx="50" cy="64" r="3.5" fill="#E76F51"/><circle cx="62" cy="64" r="3" fill="#C0392B"/></svg>`}
+    function svgCone(){return `<svg viewBox="0 0 100 100" fill="none"><path d="M36 46 L50 92 L64 46 Z" fill="#D4A373"/><path d="M40 46 L50 80 L60 46" stroke="#B8860B" stroke-width="1.5" fill="none"/><circle cx="50" cy="34" r="16" fill="#FFB6C1"/><circle cx="50" cy="26" r="2" fill="#FFF"/><circle cx="44" cy="36" r="1.5" fill="#FFF"/></svg>`}
+    function svgConeDouble(){return `<svg viewBox="0 0 100 100" fill="none"><path d="M36 50 L50 94 L64 50 Z" fill="#D4A373"/><path d="M40 50 L50 82 L60 50" stroke="#B8860B" stroke-width="1.5" fill="none"/><circle cx="50" cy="38" r="14" fill="#FFB6C1"/><circle cx="50" cy="22" r="12" fill="#8B4513"/><circle cx="50" cy="16" r="2" fill="#FFF"/><circle cx="44" cy="26" r="1.5" fill="#FFF"/></svg>`}
+    function svgBananaSplit(){return `<svg viewBox="0 0 100 100" fill="none"><path d="M20 60 Q30 30 50 28 Q70 30 80 60" stroke="#F4D03F" stroke-width="10" fill="none" stroke-linecap="round"/><circle cx="32" cy="46" r="9" fill="#FFB6C1"/><circle cx="50" cy="38" r="9" fill="#8B4513"/><circle cx="68" cy="46" r="9" fill="#FFF"/><path d="M24 62 Q50 54 76 62" stroke="#C0392B" stroke-width="3" fill="none"/><circle cx="50" cy="30" r="2.5" fill="#C0392B"/></svg>`}
+    function svgMilkshake(){return `<svg viewBox="0 0 100 100" fill="none"><path d="M34 32 L38 88 Q38 92 42 92 L58 92 Q62 92 62 88 L66 32 Z" fill="#FFB6C1"/><path d="M38 40 L60 40" stroke="#FFF" stroke-width="2" opacity="0.5"/><rect x="46" y="12" width="4" height="26" rx="2" fill="#C0392B"/><circle cx="50" cy="28" r="10" fill="#FFF"/><path d="M40 30 Q44 24 50 28 Q56 24 60 30" fill="#FF69B4"/></svg>`}
+    function svgSundae(){return `<svg viewBox="0 0 100 100" fill="none"><path d="M30 50 L34 84 Q35 88 40 88 L60 88 Q65 88 66 84 L70 50 Z" fill="#E76F51"/><ellipse cx="50" cy="50" rx="20" ry="6" fill="#F4A261"/><circle cx="40" cy="44" r="10" fill="#FFB6C1"/><circle cx="56" cy="40" r="11" fill="#8B4513"/><circle cx="50" cy="30" r="8" fill="#FFF"/><path d="M32 52 Q50 46 68 52" stroke="#C0392B" stroke-width="3" fill="none"/><circle cx="50" cy="26" r="2.5" fill="#C0392B"/></svg>`}
+    function svgPopsicle(){return `<svg viewBox="0 0 100 100" fill="none"><rect x="38" y="20" width="24" height="48" rx="8" fill="#FF6B6B"/><rect x="38" y="20" width="24" height="24" rx="8" fill="#FFB6C1"/><rect x="48" y="64" width="4" height="22" rx="2" fill="#D4A373"/><circle cx="46" cy="34" r="1.5" fill="#FFF"/><circle cx="54" cy="42" r="1.5" fill="#FFF"/></svg>`}
+    function svgCupIceCream(){return `<svg viewBox="0 0 100 100" fill="none"><path d="M30 50 L34 86 Q35 90 40 90 L60 90 Q65 90 66 86 L70 50 Z" fill="#FFF"/><ellipse cx="50" cy="50" rx="20" ry="5" fill="#DDD"/><circle cx="40" cy="42" r="10" fill="#FFB6C1"/><circle cx="56" cy="38" r="11" fill="#8B4513"/><circle cx="50" cy="28" r="8" fill="#FFF"/><path d="M34 52 L44 52" stroke="#E76F51" stroke-width="2"/></svg>`}
+    function svgIceSandwich(){return `<svg viewBox="0 0 100 100" fill="none"><rect x="22" y="30" width="56" height="10" rx="3" fill="#D4A373"/><rect x="22" y="38" width="56" height="14" rx="2" fill="#FFF"/><rect x="24" y="40" width="52" height="10" rx="2" fill="#FFB6C1"/><rect x="22" y="50" width="56" height="10" rx="3" fill="#D4A373"/><circle cx="36" cy="45" r="1.5" fill="#8B4513"/><circle cx="50" cy="45" r="1.5" fill="#8B4513"/><circle cx="64" cy="45" r="1.5" fill="#8B4513"/></svg>`}
+    function svgIceCup(){return `<svg viewBox="0 0 100 100" fill="none"><path d="M30 46 L34 88 Q35 92 40 92 L60 92 Q65 92 66 88 L70 46 Z" fill="#FFF"/><ellipse cx="50" cy="46" rx="20" ry="5" fill="#DDD"/><circle cx="40" cy="38" r="9" fill="#FFB6C1"/><circle cx="56" cy="34" r="10" fill="#8B4513"/><circle cx="50" cy="24" r="7" fill="#FFF"/><rect x="38" y="52" width="24" height="3" fill="#FF69B4"/></svg>`}
+    function svgSlush(){return `<svg viewBox="0 0 100 100" fill="none"><path d="M32 36 L36 88 Q36 92 40 92 L60 92 Q64 92 64 88 L68 36 Z" fill="#87CEEB"/><path d="M34 40 Q42 34 50 40 Q58 46 66 40" stroke="#FFF" stroke-width="2" fill="none"/><rect x="54" y="14" width="4" height="24" rx="2" fill="#FF6B6B"/><circle cx="44" cy="60" r="2" fill="#FFF" opacity="0.7"/><circle cx="56" cy="68" r="2" fill="#FFF" opacity="0.7"/><circle cx="50" cy="52" r="2" fill="#FFF" opacity="0.7"/></svg>`}
+    function svgEspresso(){return `<svg viewBox="0 0 100 100" fill="none"><path d="M26 40 L30 72 Q31 78 38 78 L62 78 Q69 78 70 72 L74 40 Z" fill="#FFF"/><ellipse cx="50" cy="40" rx="24" ry="6" fill="#8B4513"/><path d="M70 50 Q82 50 82 60 Q82 70 70 70" stroke="#FFF" stroke-width="4" fill="none"/><rect x="34" y="30" width="32" height="4" rx="2" fill="#5D4037"/></svg>`}
+    function svgCappuccino(){return `<svg viewBox="0 0 100 100" fill="none"><path d="M24 38 L28 74 Q29 80 36 80 L64 80 Q71 80 72 74 L76 38 Z" fill="#FFF"/><ellipse cx="50" cy="38" rx="26" ry="8" fill="#D4A373"/><ellipse cx="50" cy="38" rx="20" ry="5" fill="#FFF8DC"/><path d="M74 48 Q86 48 86 60 Q86 72 74 72" stroke="#FFF" stroke-width="4" fill="none"/><path d="M42 34 Q50 28 58 34" stroke="#8B4513" stroke-width="2" fill="none"/></svg>`}
+    function svgLatte(){return `<svg viewBox="0 0 100 100" fill="none"><path d="M32 24 L36 88 Q36 92 40 92 L60 92 Q64 92 64 88 L68 24 Z" fill="#FFF"/><path d="M34 32 L66 32" stroke="#D4A373" stroke-width="6" opacity="0.5"/><path d="M34 50 L66 50" stroke="#8B4513" stroke-width="6" opacity="0.4"/><ellipse cx="50" cy="24" rx="18" ry="5" fill="#D4A373"/><ellipse cx="50" cy="24" rx="12" ry="3" fill="#FFF8DC"/></svg>`}
+    function svgAmericano(){return `<svg viewBox="0 0 100 100" fill="none"><path d="M28 36 L32 76 Q33 82 40 82 L60 82 Q67 82 68 76 L72 36 Z" fill="#FFF"/><ellipse cx="50" cy="36" rx="22" ry="7" fill="#3E2723"/><path d="M72 48 Q84 48 84 60 Q84 72 72 72" stroke="#FFF" stroke-width="4" fill="none"/><ellipse cx="50" cy="36" rx="16" ry="4" fill="#5D4037"/></svg>`}
+    function svgMocha(){return `<svg viewBox="0 0 100 100" fill="none"><path d="M26 36 L30 78 Q31 84 38 84 L62 84 Q69 84 70 78 L74 36 Z" fill="#FFF"/><ellipse cx="50" cy="36" rx="24" ry="7" fill="#5D4037"/><ellipse cx="50" cy="36" rx="18" ry="4" fill="#FFF8DC"/><path d="M70 48 Q82 48 82 60 Q82 72 70 72" stroke="#FFF" stroke-width="4" fill="none"/><path d="M40 30 Q46 24 50 30 Q54 24 60 30" fill="#FFB6C1"/></svg>`}
+    function svgFrappuccino(){return `<svg viewBox="0 0 100 100" fill="none"><path d="M32 30 L36 88 Q36 92 40 92 L60 92 Q64 92 64 88 L68 30 Z" fill="#D4A373"/><path d="M34 36 Q42 30 50 36 Q58 42 66 36" stroke="#FFF" stroke-width="2" fill="none"/><rect x="46" y="10" width="4" height="24" rx="2" fill="#C0392B"/><circle cx="50" cy="26" r="10" fill="#FFF"/><path d="M40 28 Q44 22 50 26 Q56 22 60 28" fill="#FF69B4"/><circle cx="40" cy="56" r="2" fill="#FFF" opacity="0.6"/><circle cx="58" cy="62" r="2" fill="#FFF" opacity="0.6"/></svg>`}
+    function svgTea(){return `<svg viewBox="0 0 100 100" fill="none"><path d="M28 40 L32 74 Q33 80 40 80 L60 80 Q67 80 68 74 L72 40 Z" fill="#FFF"/><ellipse cx="50" cy="40" rx="22" ry="6" fill="#D4A373"/><path d="M72 50 Q82 50 82 60 Q82 70 72 70" stroke="#FFF" stroke-width="4" fill="none"/><rect x="60" y="20" width="14" height="14" rx="2" fill="#2A9D8F"/><path d="M67 34 L67 42" stroke="#2A9D8F" stroke-width="1.5"/><path d="M64 20 L64 12" stroke="#2A9D8F" stroke-width="1.5"/></svg>`}
+    function svgHotChocolate(){return `<svg viewBox="0 0 100 100" fill="none"><path d="M26 38 L30 76 Q31 82 38 82 L62 82 Q69 82 70 76 L74 38 Z" fill="#FFF"/><ellipse cx="50" cy="38" rx="24" ry="7" fill="#5D4037"/><path d="M72 50 Q84 50 84 62 Q84 74 72 74" stroke="#FFF" stroke-width="4" fill="none"/><circle cx="40" cy="30" r="4" fill="#FFF"/><circle cx="52" cy="26" r="4" fill="#FFF"/><circle cx="62" cy="32" r="3.5" fill="#FFF"/></svg>`}
+    function svgMuffin(){return `<svg viewBox="0 0 100 100" fill="none"><path d="M30 54 L36 84 Q37 88 42 88 L58 88 Q63 88 64 84 L70 54 Z" fill="#D4A373"/><path d="M30 54 Q28 34 50 32 Q72 34 70 54 Z" fill="#E9C46A"/><circle cx="42" cy="42" r="3" fill="#5D4037"/><circle cx="56" cy="38" r="3" fill="#5D4037"/><circle cx="50" cy="50" r="2.5" fill="#5D4037"/></svg>`}
+    function svgMilk(){return `<svg viewBox="0 0 100 100" fill="none"><path d="M32 30 L36 88 Q36 92 40 92 L60 92 Q64 92 64 88 L68 30 Z" fill="#FFF"/><path d="M32 30 L50 18 L68 30 Z" fill="#87CEEB"/><rect x="38" y="46" width="24" height="18" rx="3" fill="#87CEEB" opacity="0.4"/><text x="50" y="59" text-anchor="middle" font-size="8" font-weight="700" fill="#4682B4" font-family="Arial">LECHE</text><path d="M40 30 L42 88" stroke="#DDD" stroke-width="1"/></svg>`}
+    function svgBread(){return `<svg viewBox="0 0 100 100" fill="none"><rect x="22" y="40" width="56" height="36" rx="18" fill="#F4A261"/><rect x="26" y="44" width="48" height="28" rx="14" fill="#E9C46A"/><path d="M32 52 Q38 46 44 52" stroke="#D4A373" stroke-width="2" fill="none"/><path d="M50 52 Q56 46 62 52" stroke="#D4A373" stroke-width="2" fill="none"/></svg>`}
+    function svgEggs(){return `<svg viewBox="0 0 100 100" fill="none"><ellipse cx="50" cy="66" rx="30" ry="14" fill="#D4A373"/><ellipse cx="50" cy="66" rx="26" ry="10" fill="#E9C46A"/><ellipse cx="38" cy="48" rx="10" ry="14" fill="#FFF8DC"/><ellipse cx="58" cy="46" rx="10" ry="14" fill="#FFF8DC"/><ellipse cx="50" cy="56" rx="10" ry="14" fill="#FFF8DC"/><ellipse cx="38" cy="48" rx="5" ry="7" fill="#F5DEB3"/><ellipse cx="58" cy="46" rx="5" ry="7" fill="#F5DEB3"/><ellipse cx="50" cy="56" rx="5" ry="7" fill="#F5DEB3"/></svg>`}
+    function svgRice(){return `<svg viewBox="0 0 100 100" fill="none"><path d="M28 30 L32 88 Q32 92 36 92 L64 92 Q68 92 68 88 L72 30 Z" fill="#E9C46A"/><path d="M28 30 L36 22 L44 30 L52 22 L60 30 L68 22 L72 30" fill="#D4A373"/><rect x="34" y="46" width="32" height="24" rx="4" fill="#FFF8DC" opacity="0.5"/><text x="50" y="61" text-anchor="middle" font-size="8" font-weight="700" fill="#8B4513" font-family="Arial">ARROZ</text></svg>`}
+    function svgBeans(){return `<svg viewBox="0 0 100 100" fill="none"><path d="M26 32 L30 86 Q30 90 34 90 L66 90 Q70 90 70 86 L74 32 Z" fill="#5D4037"/><path d="M30 36 L34 84" stroke="#8B4513" stroke-width="1.5"/><ellipse cx="40" cy="56" rx="5" ry="8" fill="#8B4513" transform="rotate(-20 40 56)"/><ellipse cx="58" cy="60" rx="5" ry="8" fill="#8B4513" transform="rotate(15 58 60)"/><ellipse cx="48" cy="72" rx="5" ry="8" fill="#8B4513" transform="rotate(-5 48 72)"/></svg>`}
+    function svgOil(){return `<svg viewBox="0 0 100 100" fill="none"><path d="M40 28 L40 18 Q40 14 44 14 L56 14 Q60 14 60 18 L60 28 Z" fill="#D4A373"/><path d="M36 28 L34 88 Q34 92 38 92 L62 92 Q66 92 66 88 L64 28 Z" fill="#F4D03F"/><rect x="40" y="46" width="20" height="20" rx="3" fill="#FFF" opacity="0.4"/><text x="50" y="60" text-anchor="middle" font-size="7" font-weight="700" fill="#8B4513" font-family="Arial">ACEITE</text></svg>`}
+    function svgSugar(){return `<svg viewBox="0 0 100 100" fill="none"><path d="M28 30 L32 88 Q32 92 36 92 L64 92 Q68 92 68 88 L72 30 Z" fill="#FFF"/><path d="M28 30 L36 22 L44 30 L52 22 L60 30 L68 22 L72 30" fill="#DDD"/><rect x="36" y="48" width="28" height="20" rx="3" fill="#87CEEB" opacity="0.3"/><text x="50" y="61" text-anchor="middle" font-size="7" font-weight="700" fill="#4682B4" font-family="Arial">AZÚCAR</text></svg>`}
+    function svgSalt(){return `<svg viewBox="0 0 100 100" fill="none"><rect x="30" y="36" width="40" height="48" rx="4" fill="#FFF"/><rect x="30" y="36" width="40" height="12" rx="4" fill="#DDD"/><circle cx="42" cy="58" r="1.5" fill="#CCC"/><circle cx="52" cy="54" r="1.5" fill="#CCC"/><circle cx="58" cy="64" r="1.5" fill="#CCC"/><circle cx="46" cy="68" r="1.5" fill="#CCC"/><text x="50" y="76" text-anchor="middle" font-size="7" font-weight="700" fill="#999" font-family="Arial">SAL</text></svg>`}
+    function svgCoffeeBag(){return `<svg viewBox="0 0 100 100" fill="none"><path d="M30 30 L32 88 Q32 92 36 92 L64 92 Q68 92 68 88 L70 30 Z" fill="#6D4C41"/><path d="M30 30 L38 22 L46 30 L54 22 L62 30 L70 22 L70 30" fill="#5D4037"/><rect x="36" y="48" width="28" height="22" rx="3" fill="#D4A373"/><text x="50" y="59" text-anchor="middle" font-size="6.5" font-weight="700" fill="#3E2723" font-family="Arial">CAFÉ</text><text x="50" y="67" text-anchor="middle" font-size="5" font-weight="600" fill="#3E2723" font-family="Arial">MOLIDO</text></svg>`}
+    function svgPasta(){return `<svg viewBox="0 0 100 100" fill="none"><rect x="24" y="32" width="52" height="48" rx="4" fill="#F4D03F"/><rect x="24" y="32" width="52" height="10" rx="4" fill="#E9C46A"/><text x="50" y="62" text-anchor="middle" font-size="7" font-weight="700" fill="#8B4513" font-family="Arial">PASTA</text><path d="M32 74 L44 74 M50 74 L62 74 M56 78 L68 78" stroke="#D4A373" stroke-width="2"/></svg>`}
+
+    /* ===== FARMACIA ===== */
+    function svgPillBottle(){return `<svg viewBox="0 0 100 100" fill="none"><rect x="36" y="12" width="28" height="10" rx="3" fill="#E74C3C"/><rect x="30" y="22" width="40" height="62" rx="6" fill="#FFF"/><rect x="30" y="22" width="40" height="12" rx="6" fill="#F5F5F5"/><rect x="34" y="42" width="32" height="30" rx="4" fill="#E74C3C" opacity="0.88"/><text x="50" y="59" text-anchor="middle" font-size="9" font-weight="800" fill="#FFF" font-family="Arial">500</text><text x="50" y="68" text-anchor="middle" font-size="5" font-weight="700" fill="#FFF" font-family="Arial">mg</text></svg>`}
+    function svgCapsule(){return `<svg viewBox="0 0 100 100" fill="none"><g transform="rotate(-25 50 50)"><rect x="18" y="40" width="64" height="20" rx="10" fill="#FFF"/><path d="M50 40 L72 40 Q82 40 82 50 Q82 60 72 60 L50 60 Z" fill="#3498DB"/><rect x="18" y="40" width="64" height="20" rx="10" fill="none" stroke="#D5DBDB" stroke-width="1.2"/><path d="M50 40 L50 60" stroke="#B0BEC5" stroke-width="1"/><circle cx="34" cy="50" r="1.3" fill="#D5DBDB"/><circle cx="42" cy="50" r="1.3" fill="#D5DBDB"/><circle cx="58" cy="50" r="1.3" fill="#FFF" opacity="0.7"/><circle cx="66" cy="50" r="1.3" fill="#FFF" opacity="0.7"/></g></svg>`}
+    function svgSanitizer(){return `<svg viewBox="0 0 100 100" fill="none"><rect x="43" y="8" width="14" height="12" rx="2" fill="#2980B9"/><path d="M38 20 L62 20 L62 26 L38 26 Z" fill="#3498DB"/><rect x="34" y="26" width="32" height="58" rx="7" fill="#AED6F1"/><rect x="38" y="46" width="24" height="22" rx="3" fill="#FFF" opacity="0.65"/><text x="50" y="60" text-anchor="middle" font-size="7" font-weight="800" fill="#2980B9" font-family="Arial">GEL</text><rect x="38" y="30" width="24" height="3" rx="1.5" fill="#FFF" opacity="0.4"/></svg>`}
+    function svgMask(){return `<svg viewBox="0 0 100 100" fill="none"><path d="M22 36 Q50 28 78 36 L78 58 Q50 74 22 58 Z" fill="#ECF0F1"/><path d="M22 36 Q50 28 78 36" stroke="#BDC3C7" stroke-width="1.5" fill="none"/><path d="M22 58 Q50 74 78 58" stroke="#BDC3C7" stroke-width="1.5" fill="none"/><path d="M22 40 L10 34 M22 47 L8 47 M22 54 L10 60" stroke="#BDC3C7" stroke-width="1.5" stroke-linecap="round"/><path d="M78 40 L90 34 M78 47 L92 47 M78 54 L90 60" stroke="#BDC3C7" stroke-width="1.5" stroke-linecap="round"/><path d="M28 45 L72 45 M28 53 L72 53" stroke="#95A5A6" stroke-width="1.5" stroke-dasharray="3 3"/></svg>`}
+    function svgBandAid(){return `<svg viewBox="0 0 100 100" fill="none"><g transform="rotate(-25 50 50)"><rect x="14" y="40" width="72" height="20" rx="10" fill="#F5CBA7"/><rect x="38" y="40" width="24" height="20" fill="#FBE3C8"/><circle cx="44" cy="46" r="1.3" fill="#D35400"/><circle cx="50" cy="46" r="1.3" fill="#D35400"/><circle cx="56" cy="46" r="1.3" fill="#D35400"/><circle cx="47" cy="50" r="1.3" fill="#D35400"/><circle cx="53" cy="50" r="1.3" fill="#D35400"/><circle cx="44" cy="54" r="1.3" fill="#D35400"/><circle cx="50" cy="54" r="1.3" fill="#D35400"/><circle cx="56" cy="54" r="1.3" fill="#D35400"/></g></svg>`}
+    function svgBandageRoll(){return `<svg viewBox="0 0 100 100" fill="none"><circle cx="50" cy="52" r="27" fill="#ECF0F1"/><circle cx="50" cy="52" r="19" fill="#D5DBDB"/><circle cx="50" cy="52" r="12" fill="#ECF0F1"/><path d="M50 25 L50 79" stroke="#BDC3C7" stroke-width="1"/><path d="M23 52 L77 52" stroke="#BDC3C7" stroke-width="1"/><path d="M73 64 Q83 70 88 78" stroke="#ECF0F1" stroke-width="7" stroke-linecap="round"/></svg>`}
+    function svgOralSerum(){return `<svg viewBox="0 0 100 100" fill="none"><path d="M28 30 L28 26 Q28 22 32 22 L68 22 Q72 22 72 26 L72 30 Z" fill="#E67E22"/><rect x="28" y="30" width="44" height="52" rx="4" fill="#F5B041"/><rect x="32" y="44" width="36" height="24" rx="3" fill="#FFF" opacity="0.92"/><text x="50" y="56" text-anchor="middle" font-size="6.5" font-weight="800" fill="#D35400" font-family="Arial">SUERO</text><text x="50" y="64" text-anchor="middle" font-size="5.5" font-weight="700" fill="#D35400" font-family="Arial">ORAL</text><path d="M36 22 L36 14 M64 22 L64 14" stroke="#D35400" stroke-width="1.5" stroke-linecap="round"/></svg>`}
+    function svgSoap(){return `<svg viewBox="0 0 100 100" fill="none"><path d="M46 8 L46 20" stroke="#7F8C8D" stroke-width="3" stroke-linecap="round"/><path d="M42 20 L58 20 L58 27 L42 27 Z" fill="#7F8C8D"/><rect x="34" y="27" width="32" height="58" rx="9" fill="#AED6F1"/><rect x="38" y="46" width="24" height="26" rx="4" fill="#FFF" opacity="0.65"/><text x="50" y="59" text-anchor="middle" font-size="6" font-weight="800" fill="#2980B9" font-family="Arial">JABÓN</text><circle cx="40" cy="36" r="2" fill="#FFF" opacity="0.5"/><circle cx="60" cy="36" r="2" fill="#FFF" opacity="0.5"/></svg>`}
+    function svgThermometer(){return `<svg viewBox="0 0 100 100" fill="none"><rect x="43" y="12" width="14" height="58" rx="7" fill="#ECF0F1"/><circle cx="50" cy="76" r="13" fill="#E74C3C"/><rect x="46" y="32" width="8" height="42" fill="#E74C3C"/><path d="M46 30 L54 30 M46 40 L54 40 M46 50 L54 50 M46 60 L54 60" stroke="#BDC3C7" stroke-width="1"/><rect x="48" y="14" width="4" height="18" fill="#BDC3C7" opacity="0.4"/></svg>`}
+    function svgVitaminC(){return `<svg viewBox="0 0 100 100" fill="none"><rect x="36" y="12" width="28" height="10" rx="3" fill="#E67E22"/><rect x="30" y="22" width="40" height="62" rx="6" fill="#FFF"/><rect x="30" y="22" width="40" height="12" rx="6" fill="#F5F5F5"/><circle cx="50" cy="56" r="15" fill="#F39C12"/><text x="50" y="53" text-anchor="middle" font-size="7" font-weight="800" fill="#FFF" font-family="Arial">VIT</text><text x="50" y="63" text-anchor="middle" font-size="9" font-weight="900" fill="#FFF" font-family="Arial">C</text></svg>`}
+
+    /* ============================================================
+       ESTADO
+       ============================================================ */
+    let activeCategory = 'fast';
+    let cart = {};
+
+    const grid         = document.getElementById('grid');
+    const appMain      = document.getElementById('appMain');
+    const catTitle     = document.getElementById('catTitle');
+    const menuToggle   = document.getElementById('menuToggle');
+    const catMenu      = document.getElementById('catMenu');
+    const catMenuInner = document.getElementById('catMenuInner');
+    const menuBackdrop = document.getElementById('menuBackdrop');
+    const storeNameEl  = document.getElementById('storeName');
+    const storeText    = document.getElementById('storeText');
+    const totalDisplay = document.getElementById('totalDisplay');
+    const itemCount    = document.getElementById('itemCount');
+    const clockDisplay = document.getElementById('clockDisplay');
+    const toast        = document.getElementById('toast');
+    const clearBtn     = document.getElementById('clearBtn');
+    const payBtn       = document.getElementById('payBtn');
+    const nameModal    = document.getElementById('nameModal');
+    const nameInput    = document.getElementById('nameInput');
+    const cancelName   = document.getElementById('cancelName');
+    const saveName     = document.getElementById('saveName');
+    const paymentOverlay = document.getElementById('paymentOverlay');
+    const stageSuccess = document.getElementById('stageSuccess');
+    const stageReceipt = document.getElementById('stageReceipt');
+    const receiptWrap  = document.getElementById('receiptWrap');
+    const receiptContent = document.getElementById('receiptContent');
+    const successAmount = document.getElementById('successAmount');
+    const doneBtn      = document.getElementById('doneBtn');
+
+    /* ============================================================
+       MENÚ DESPLEGABLE DE CATEGORÍAS
+       ============================================================ */
+    function renderMenu() {
+      catMenuInner.innerHTML = '';
+      CATEGORIES.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.className = 'cat-item' + (cat.id === activeCategory ? ' active' : '');
+        btn.type = 'button';
+        btn.innerHTML = `
+          <span class="cat-item-emoji">${cat.emoji}</span>
+          <span class="cat-item-name">${cat.name}</span>
+          <span class="cat-item-count">${PRODUCTS[cat.id].length}</span>
+        `;
+        btn.addEventListener('click', () => selectCategory(cat.id));
+        catMenuInner.appendChild(btn);
+      });
+    }
+
+    function openMenu() {
+      renderMenu();
+      catMenu.classList.add('open');
+      menuBackdrop.classList.add('show');
+      document.body.classList.add('menu-open');
+    }
+
+    function closeMenu() {
+      catMenu.classList.remove('open');
+      menuBackdrop.classList.remove('show');
+      document.body.classList.remove('menu-open');
+    }
+
+    function toggleMenu() {
+      if (catMenu.classList.contains('open')) closeMenu();
+      else openMenu();
+    }
+
+    menuToggle.addEventListener('click', toggleMenu);
+    menuBackdrop.addEventListener('click', closeMenu);
+
+    function selectCategory(id) {
+      activeCategory = id;
+      const cat = CATEGORIES.find(c => c.id === id);
+      catTitle.innerHTML = `<span class="ct-emoji">${cat.emoji}</span> ${cat.name}`;
+      renderProducts();
+      closeMenu();
+      appMain.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* ============================================================
+       RENDER DE PRODUCTOS
+       ============================================================ */
+    function renderProducts() {
+      const list = PRODUCTS[activeCategory] || [];
+      grid.innerHTML = '';
+      list.forEach((p, i) => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.style.animationDelay = `${i * 28}ms`;
+        card.innerHTML = `
+          <div class="svg-well">${p.svg()}</div>
+          <div class="p-name">${p.name}</div>
+          <div class="p-price">₡${p.price.toLocaleString('es-CR')}</div>
+        `;
+        card.addEventListener('click', () => addToCart(p, activeCategory, i));
+        grid.appendChild(card);
+      });
+    }
+
+    /* ============================================================
+       CARRITO / TOTAL
+       ============================================================ */
+    function addToCart(product, catId, index) {
+      const key = `${catId}-${index}`;
+      if (!cart[key]) cart[key] = { qty: 0, price: product.price, name: product.name };
+      cart[key].qty++;
+      updateTotal();
+      bumpDisplay();
+      showToast(`✓ ${product.name} agregado`);
+    }
+
+    function updateTotal() {
+      let total = 0, count = 0;
+      Object.values(cart).forEach(item => {
+        total += item.price * item.qty;
+        count += item.qty;
+      });
+      totalDisplay.textContent = `₡${total.toLocaleString('es-CR')}`;
+      itemCount.textContent = `${count} artículo${count !== 1 ? 's' : ''}`;
+    }
+
+    function bumpDisplay() {
+      totalDisplay.classList.add('bump');
+      setTimeout(() => totalDisplay.classList.remove('bump'), 180);
+    }
+
+    clearBtn.addEventListener('click', () => {
+      if (Object.keys(cart).length === 0) return;
+      cart = {};
+      updateTotal();
+      showToast('🗑️ Carrito limpiado');
+    });
+
+    /* ============================================================
+       TOAST
+       ============================================================ */
+    let toastTimer;
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 1600);
+    }
+
+    /* ============================================================
+       RELOJ
+       ============================================================ */
+    function updateClock() {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2, '0');
+      const m = String(now.getMinutes()).padStart(2, '0');
+      const s = String(now.getSeconds()).padStart(2, '0');
+      clockDisplay.textContent = `${h}:${m}:${s}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    /* ============================================================
+       NOMBRE DE TIENDA
+       ============================================================ */
+    storeNameEl.addEventListener('click', () => {
+      nameInput.value = storeText.textContent.trim();
+      nameModal.classList.add('show');
+      setTimeout(() => { nameInput.focus(); nameInput.select(); }, 80);
+    });
+
+    function closeNameModal() { nameModal.classList.remove('show'); }
+    cancelName.addEventListener('click', closeNameModal);
+
+    saveName.addEventListener('click', () => {
+      const val = nameInput.value.trim();
+      if (val) storeText.textContent = val;
+      closeNameModal();
+    });
+
+    nameInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') saveName.click();
+      if (e.key === 'Escape') closeNameModal();
+    });
+
+    nameModal.addEventListener('click', (e) => {
+      if (e.target === nameModal) closeNameModal();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (nameModal.classList.contains('show')) closeNameModal();
+        else if (catMenu.classList.contains('open')) closeMenu();
+      }
+    });
+
+    /* ============================================================
+       PAGO + ANIMACIONES
+       ============================================================ */
+    const wait = (ms) => new Promise(r => setTimeout(r, ms));
+
+    payBtn.addEventListener('click', async () => {
+      if (Object.keys(cart).length === 0) {
+        showToast('El carrito está vacío');
+        return;
+      }
+
+      const items = Object.values(cart).map(i => ({ ...i }));
+      const total = items.reduce((s, i) => s + i.price * i.qty, 0);
+      const now = new Date();
+
+      stageReceipt.style.display = 'none';
+      stageReceipt.classList.remove('active');
+      receiptWrap.style.maxHeight = '0';
+      doneBtn.classList.remove('show');
+
+      paymentOverlay.classList.add('show');
+      stageSuccess.style.display = 'flex';
+      successAmount.textContent = `₡${total.toLocaleString('es-CR')}`;
+      void stageSuccess.offsetWidth;
+      stageSuccess.classList.add('active');
+
+      await wait(2300);
+
+      stageSuccess.classList.remove('active');
+      await wait(320);
+      stageSuccess.style.display = 'none';
+
+      stageReceipt.style.display = 'flex';
+      buildReceipt(items, total, now);
+
+      receiptWrap.style.maxHeight = '0';
+      void receiptWrap.offsetHeight;
+
+      requestAnimationFrame(() => {
+        receiptWrap.style.maxHeight = receiptWrap.scrollHeight + 'px';
+      });
+
+      setTimeout(() => doneBtn.classList.add('show'), 1350);
+    });
+
+    function buildReceipt(items, total, date) {
+      const storeLabel = storeText.textContent.trim() || 'Mi Tienda';
+      const dateStr = date.toLocaleDateString('es-CR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      const timeStr = date.toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' });
+
+      let linesHTML = '';
+      items.forEach(it => {
+        const lineTotal = it.price * it.qty;
+        linesHTML += `
+          <div class="receipt-line">
+            <span>${it.qty}x ${it.name}</span>
+            <span>₡${lineTotal.toLocaleString('es-CR')}</span>
+          </div>`;
+      });
+
+      const divider = '<div class="receipt-divider">--------------------------------</div>';
+
+      receiptContent.innerHTML = `
+        <div class="receipt-header">
+          <div class="receipt-store">${storeLabel}</div>
+          <div>San José, Costa Rica</div>
+          <div>Tel: 2222-3333</div>
+        </div>
+        ${divider}
+        <div>Fecha: ${dateStr}  ${timeStr}</div>
+        ${divider}
+        <div class="receipt-items">${linesHTML}</div>
+        ${divider}
+        <div class="receipt-line receipt-total">
+          <span>TOTAL</span>
+          <span>₡${total.toLocaleString('es-CR')}</span>
+        </div>
+        ${divider}
+        <div class="receipt-footer">
+          ¡GRACIAS POR SU COMPRA!<br>
+          *** PAGO EFECTUADO ***
+          <br>
+          <span class="receipt-stamp">✓ PAGADO</span>
+        </div>
+      `;
+    }
+
+    doneBtn.addEventListener('click', () => {
+      paymentOverlay.classList.remove('show');
+      stageSuccess.style.display = 'none';
+      stageSuccess.classList.remove('active');
+      stageReceipt.style.display = 'none';
+      receiptWrap.style.maxHeight = '0';
+      doneBtn.classList.remove('show');
+      cart = {};
+      updateTotal();
+      showToast('✓ Pago completado');
+    });
+
+    /* ============================================================
+       INICIALIZAR
+       ============================================================ */
+    renderMenu();
+    selectCategory('fast');
+    updateTotal();
+  </script>
+</body>
+</html>
